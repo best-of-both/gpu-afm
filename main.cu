@@ -3,15 +3,16 @@
 #include<string.h>
 #include<stdlib.h>
 
-#define BLOCK_SIZE 1024 //@@ Number of threads per block
-#define DEBUG 0         //@@ toggle for debug messages
-#define REPS 1		//Max number of runs for timing analysis
+#define THREADS_PER_BLOCK 1024 
+#define BLOCKS_PER_GRID   512  
+#define DEBUG 0                 //@@ toggle for debug messages
+#define REPS 1			//Max number of runs for timing analysis
 
 /* Choose which kernel to run:
-  1) Naive implementation
-  2) improved branch performance (non-divergent)
-  3) Non Divergent  total w/ GPU summing
-  4) Sequential Addressing
+  1) 
+  2) 
+  3) 
+  4) 
 */
 #define KERNEL_SELECT 1
 
@@ -26,23 +27,14 @@ void _errorCheck(cudaError_t e){
 
 //GPU Function.  Called from host, runs on device
 //Input:
-//	*input:		pointer to input array
-//	*output:	pointer to output array
-//	len:		memory footprint of passed arrays
+//	
 //output:
-//	NA
-//Desc:	Takes in pointers for the input array and writes the prefix
-//	sum elements to the indicies of the output array
-__global__ void naive_total(float *input, float *output, int len) {
+//	
+//Desc:	
+__global__ void func1( ) {
 
 //VARIABLES
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
-	int maxBlocks = ceil(len/float(BLOCK_SIZE));
-
-	//Copy input list into shared memory
-	__shared__ float sinput[BLOCK_SIZE];
-//	sinput[threadIdx.x]=0;
-
 
 
 //GPU Function.  Called from host, runs on device
@@ -51,7 +43,7 @@ __global__ void naive_total(float *input, float *output, int len) {
 //	
 //Desc:	
 
-__global__ void func1( ) {
+__global__ void func2( ) {
 
 //VARIABLES
 	int tid = blockIdx.x * blockDim.x + threadIdx.x;
@@ -141,9 +133,6 @@ int main(int argc, char **argv) {
   float *deviceInput;
   float *deviceOutput;
 
-  int numInputElements;  // number of elements in the input list
-  int numOutputElements; // number of elements in the output list
-
   float *solution;
 
 
@@ -182,24 +171,16 @@ int main(int argc, char **argv) {
   switch(KERNEL_SELECT)
   {
     case 1:
-      kernel = &naive_total;
-      kernelName = "Naive Total		";
+      kernel = &func1;
+      kernelName = "Function 1		";
       break;
     case 2:
-      kernel = &nondivergent_total;
-      kernelName = "Non Divergent Total ";
-      break;
-    case 3:
-      kernel = &ndsummed_total;
-      kernelName = "ND internal summed ";
-      break;
-    case 4:
-      kernel = &sequentialAddress_total;
-      kernelName = "Sequential Address ";
+      kernel = &func2;
+      kernelName = "Function 2 ";
       break;
     default:
-      kernel = &naive_total;
-      kernelName = "Naive Total		";
+      kernel = &func1;
+      kernelName = "Function 1		";
       break;
    }// end switch
 
