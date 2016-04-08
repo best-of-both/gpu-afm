@@ -3,8 +3,9 @@
 #include<string.h>
 #include<stdlib.h>
 
-#define THREADS_PER_BLOCK 1024 
-#define BLOCKS_PER_GRID   512  
+#define BLOCK_DIM_X 1024 
+#define BLOCK_DIM_Y 512  
+
 #define DEBUG 0                 //@@ toggle for debug messages
 #define REPS 1			//Max number of runs for timing analysis
 
@@ -195,10 +196,6 @@ int main(int argc, char **argv) {
     cudaMemcpy(deviceOutput, hostOutput, memSizeOut, cudaMemcpyHostToDevice);
 
   //@@ Initialize the grid and block dimensions here
-
-    dim3 numBlocks(numOutputElements,1,1);
-    dim3 numThreads(BLOCK_SIZE,1,1);
-
 
   // Initialize timer
     cudaEvent_t start,stop;
