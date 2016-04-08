@@ -1,3 +1,5 @@
+#include "stdio.h"
+
 __global__ void
 device_build_a(int* a, unsigned int nx, unsigned int ny)
 {
@@ -17,8 +19,8 @@ device_build_a(int* a, unsigned int nx, unsigned int ny)
 		unsigned int col = thread % nx;
 		unsigned int row = thread / nx;
 
-		a[4 * thread    ] = (int) (row > 0);
-		a[4 * thread + 1] = (int) (col > 0);
+		a[4 * thread    ] = (int) (row > 0u);
+		a[4 * thread + 1] = (int) (col > 0u);
 		a[4 * thread + 2] = (int) (col < nx-1);
 		a[4 * thread + 3] = (int) (row < ny-1);
 	}
