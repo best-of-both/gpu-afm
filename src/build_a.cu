@@ -1,5 +1,3 @@
-#include "stdio.h"
-
 __global__ void
 device_build_a(int* a, unsigned int nx, unsigned int ny)
 {
