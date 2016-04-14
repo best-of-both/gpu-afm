@@ -1,7 +1,11 @@
 ## Things to do
 
 # Project Goals
-- [] build A matrix in parallel -- http://stackoverflow.com/questions/15997888/creating-identity-matrix-with-cuda
+- [x] build A matrix in parallel
+    * Used a method that does not store any coefficients since
+      A is very regular.
+- [] build P matrix in parallel
+- [] build E matrix in parallel
 - [] CUDA Library to calculate eigenvalues from a large (sparse) Matrix?
 - [] Perform efficient matrix/vector multiplications
 - [] Perform some type of timing analysis to quantify our speed up and show the utility of parallelization.
