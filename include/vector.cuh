@@ -1,28 +1,28 @@
-#ifndef DT_VECTOR_H
-#define DT_VECTOR_H
+#ifndef DT_VECTOR_CUH
+#define DT_VECTOR_CUH
 
 namespace dt {
 
-	template<unsigned int N>
 	class vector {
 		private:
+			const unsigned int n;
 			float* values;
-
 		public:
-			__host__ vector(float* h_values) {
-				cudaMalloc((void**) &values, N * sizeof(float));
-				cudaMemcpy(values, h_values, N * sizeof(float), cudaMemcpyHostToDevice);
+			__host__ vector(unsigned int n, float* h_values) : n(n){
+				cudaMalloc((void**) &values, n * sizeof(float));
+				cudaMemcpy(values, h_values, n * sizeof(float), cudaMemcpyHostToDevice);
 			}
 
-			__host__ vector() {
-				cudaMalloc((void**) &values, N * sizeof(float));
-				cudaMemset(values, 0x00, N * sizeof(float));
+			__host__ vector(unsigned int n) : n(n)  {
+				cudaMalloc((void**) &values, n * sizeof(float));
+				cudaMemset(values, 0x00, n * sizeof(float));
 			}
 
-			__device__ float& operator[](unsigned int n) { return values[n]; }
+			__device__ float& operator[](unsigned int i) { return values[i]; }
+			__host__ __device__ unsigned int size() { return n; }
 
 			void get(float* rec) {
-				cudaMemcpy(rec, values, N * sizeof(float), cudaMemcpyDeviceToHost);
+				cudaMemcpy(rec, values, n * sizeof(float), cudaMemcpyDeviceToHost);
 			}
 	};
 

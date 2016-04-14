@@ -11,8 +11,8 @@ int main(int argc, char **argv) {
 	for (int i = 0; i < 64 * 64; ++i)
 		ys[i] = 2.0;
 
-	dt::helmholtz<64, 64, 1> A(1);
-	dt::vector<64 * 64> x(ys), y = A * x;
+	dt::helmholtz A(64, 64, 1, 1);
+	dt::vector x(64 * 64, ys), y = A * x;
 	CHECK(cudaGetLastError());
 
 	y.get(ys);

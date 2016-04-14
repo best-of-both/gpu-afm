@@ -6,22 +6,23 @@
 
 namespace dt {
 
-	template<unsigned int nx, unsigned int ny, unsigned int n>
 	class helmholtz {
 		private:
+			unsigned int nx, ny, n;
 			float scale;
 		protected:
-			__device__ float vector_multiply(vector<nx * ny>& vec);
-			friend void matrix_vector_multiply<>(vector<nx * ny>, helmholtz, vector<nx * ny>);
 		public:
-			__host__ __device__ helmholtz(float scale) :
-				scale(scale) {}
-			__host__ vector<nx * ny> operator*(vector<nx * ny>&);
+			// XXX wish to move this to `protected` vis.
+			__device__ float vector_multiply(vector& vec);
+			__host__ __device__ helmholtz(unsigned int nx, unsigned int ny, unsigned int n, float scale) :
+				nx(nx), ny(ny), n(n), scale(scale) {}
+			__host__ vector operator*(vector&);
+		// XXX for some reason this is now broken when compiling with nvcc...
+		//friend __global__ void matrix_vector_multiply<>(vector, helmholtz, vector);
 	};
 
-	template<unsigned int nx, unsigned int ny, unsigned int n>
 	__device__ float
-	helmholtz<nx, ny, n>::vector_multiply(vector<nx * ny>& vec)
+	helmholtz::vector_multiply(vector& vec)
 	{
 		unsigned int thread = blockDim.x * blockIdx.x + threadIdx.x;
 		unsigned int col = thread % nx;
@@ -35,11 +36,10 @@ namespace dt {
 		return center + scale * n * n * (down + left + right + up - 4 * center);
 	}
 
-	template<unsigned int nx, unsigned int ny, unsigned int n>
-	__host__ vector<nx * ny>
-	helmholtz<nx, ny, n>::operator*(vector<nx * ny>& vec)
+	__host__ vector
+	helmholtz::operator*(vector& vec)
 	{
-		vector<nx * ny> result;
+		vector result(nx * ny);
 		dim3 grid(nx * ny / 1024);
 		dim3 block(1024);
 		
