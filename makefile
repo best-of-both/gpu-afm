@@ -1,5 +1,5 @@
 NVCC=/usr/local/cuda/bin/nvcc
-CC=/Users/atkassen/Downloads/clang+llvm-3.7.0-x86_64-apple-darwin/bin/clang
+CC=cc
 
 INCLUDE=-I/usr/local/cuda/include \
         -I/usr/local/cuda/samples/common/inc \
