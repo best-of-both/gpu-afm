@@ -1,6 +1,9 @@
-CC=/usr/local/cuda/bin/nvcc
+NVCC=/usr/local/cuda/bin/nvcc
+CC=/Users/atkassen/Downloads/clang+llvm-3.7.0-x86_64-apple-darwin/bin/clang
+
 INCLUDE=-I/usr/local/cuda/include \
-        -I/usr/local/cuda/samples/common/inc
+        -I/usr/local/cuda/samples/common/inc \
+        -Iinclude
 
 LIBDIR=-L/usr/local/cuda/lib64
 LIBS=-lcublas_static -lculibos
@@ -9,7 +12,18 @@ SOURCE=main.cu
 EXECUTABLE=AFM_project
 
 $(EXECUTABLE): $(SOURCE)
-	$(CC) -g $(INCLUDE) $(LIBDIR) $< -o $@ $(LIBS)
+	$(NVCC) -ccbin=$(CC) -g $(INCLUDE) $(LIBDIR) $< -o $@ $(LIBS)
+	
+objs/forcing.o: src/forcing.cu
+	$(NVCC) -ccbin=$(CC) $(INCLUDE) $(LIBS) $< -c -o $@
+	
+objs/mapping_matrix.o: src/mapping_matrix.cu
+	$(NVCC) -ccbin=$(CC) $(INCLUDE) $(LIBS) $< -c -o $@
+	
+test_fpm: test/test_forcing_point_map.cu objs/forcing.o objs/mapping_matrix.o
+	$(NVCC) -ccbin=$(CC) $(INCLUDE) $(LIBS) $^ -o $@
+
+test: test_fpm
 
 clean:
 

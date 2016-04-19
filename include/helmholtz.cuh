@@ -21,32 +21,6 @@ namespace dt {
 		//friend __global__ void matrix_vector_multiply<>(vector, helmholtz, vector);
 	};
 
-	__device__ float
-	helmholtz::vector_multiply(vector& vec)
-	{
-		unsigned int thread = blockDim.x * blockIdx.x + threadIdx.x;
-		unsigned int col = thread % nx;
-		unsigned int row = thread / nx;
-		
-		float down = row > 0 ? vec[thread - nx] : 0,
-		      left = col > 0 ? vec[thread - 1] : 0,
-		      center = vec[thread],
-		      right = col < nx - 1 ? vec[thread + 1] : 0,
-		      up = row < ny - 1 ? vec[thread + nx] : 0;
-		return center + scale * n * n * (down + left + right + up - 4 * center);
-	}
-
-	__host__ vector
-	helmholtz::operator*(vector& vec)
-	{
-		vector result(nx * ny);
-		dim3 grid(nx * ny / 1024);
-		dim3 block(1024);
-		
-		launch_mult_kernel(result, *this, vec, grid, block);
-		return result;
-	}
-
 }
 
 #endif
