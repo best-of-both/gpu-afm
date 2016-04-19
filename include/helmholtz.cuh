@@ -13,7 +13,7 @@ namespace dt {
 		protected:
 		public:
 			// XXX wish to move this to `protected` vis.
-			__device__ float vector_multiply(vector& vec);
+			__device__ void vector_multiply(vector&, vector&);
 			__host__ __device__ helmholtz(unsigned int nx, unsigned int ny, unsigned int n, float scale) :
 				nx(nx), ny(ny), n(n), scale(scale) {}
 			__host__ vector operator*(vector&);

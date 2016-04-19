@@ -4,6 +4,7 @@
 #include "cuda.h"
 #include "vector.cuh"
 #include "helmholtz.cuh"
+#include "debug.cuh"
 
 int main(int argc, char **argv) {
 	float *ys = (float *) malloc(64 * 64 * sizeof(float));

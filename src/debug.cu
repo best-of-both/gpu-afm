@@ -1,6 +1,9 @@
-#define CHECK(e) _errorCheck(e, __FILE__, __LINE__)
+#include <stdlib.h>
+#include <stdio.h>
+#include "cuda.h"
+#include "debug.cuh"
 
-void _errorCheck(cudaError_t e, const char* file, int line){
+void _cudaErrorCheck(cudaError_t e, const char* file, int line){
 	if(e != cudaSuccess){
 		printf("Failed to run statement (%s:%d): %s \n",
 		       file, line, cudaGetErrorString(e));

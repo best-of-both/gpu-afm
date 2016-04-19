@@ -17,7 +17,7 @@ namespace dt {
 				  center = in[thread],
 				  right = col < nx - 1 ? in[thread + 1] : 0,
 				  up = row < ny - 1 ? in[thread + nx] : 0;
-			out[thread] center + scale * n * n * (down + left + right + up - 4 * center);
+			out[thread] = center + scale * n * n * (down + left + right + up - 4 * center);
 		}
 	}
 

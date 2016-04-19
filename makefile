@@ -1,29 +1,23 @@
-NVCC=/usr/local/cuda/bin/nvcc
-CC=cc
+SUBDIRS := $(shell ls -F */Makefile)
+MODULES := src #$(patsubst %/Makefile, %, $(SUBDIRS))
+CLEAN := $(patsubst %, %-clean, $(MODULES))
+depth := [$(MAKELEVEL)]
 
-INCLUDE=-I/usr/local/cuda/include \
-        -I/usr/local/cuda/samples/common/inc \
-        -Iinclude
-
-LIBDIR=-L/usr/local/cuda/lib64
-LIBS=-lcublas_static -lculibos
-
-SOURCE=main.cu
-EXECUTABLE=AFM_project
-
-$(EXECUTABLE): $(SOURCE)
-	$(NVCC) -ccbin=$(CC) -g $(INCLUDE) $(LIBDIR) $< -o $@ $(LIBS)
+# Make modules
+all: $(MODULES)
 	
-objs/forcing.o: src/forcing.cu
-	$(NVCC) -ccbin=$(CC) $(INCLUDE) $(LIBS) $< -c -o $@
+.PHONY: $(MODULES)
+$(MODULES):
+	@echo "$(depth) \033[32;1mMAKE\033[0m $@/ all"
+	@${MAKE} --quiet --directory=$@ all
 	
-objs/mapping_matrix.o: src/mapping_matrix.cu
-	$(NVCC) -ccbin=$(CC) $(INCLUDE) $(LIBS) $< -c -o $@
+.DEFAULT:
+	@for m in $(MODULES); do \
+		echo "$(depth) \033[32;1mMAKE\033[0m $$m/ $@"; \
+		${MAKE} --quiet --directory=$$m $@; \
+	done
 	
-test_fpm: test/test_forcing_point_map.cu objs/forcing.o objs/mapping_matrix.o
-	$(NVCC) -ccbin=$(CC) $(INCLUDE) $(LIBS) $^ -o $@
-
-test: test_fpm
-
-clean:
-
+test: $(MODULES)
+	@echo "$(depth) \033[32;1mMAKE\033[0m $@/ all"
+	@${MAKE} --quiet --directory=test all
+	
