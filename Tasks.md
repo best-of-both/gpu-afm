@@ -2,12 +2,12 @@
 
 # Project Goals
 - [x] build A matrix in parallel
-    * Used a method that does not store any coefficients since
-      A is very regular.
-- [ ] build P matrix in parallel
-- [ ] build E matrix in parallel
+    * Used a method that does not store any coefficients since A is very regular.
+- [x] build P matrix in parallel
+    * Used a strided reduction. This could possibly be improved since it breaks global access coalescing. (Maybe.)
+- [x] build E matrix in parallel
 - [ ] CUDA Library to calculate eigenvalues from a large (sparse) Matrix?
-- [ ] Perform efficient matrix/vector multiplications
+- [x] Perform efficient matrix/vector multiplications
 - [ ] Perform some type of timing analysis to quantify our speed up and show the utility of parallelization.
 
 # Reach Goals

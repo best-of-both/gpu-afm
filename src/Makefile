@@ -11,9 +11,10 @@ PROJECT := afm
 SUBDIRS := $(shell ls -F | grep "\/" | grep -v '^test\/$$' )
 MODULES := #$(patsubst %/Makefile,%,$(shell ls */Makefile))
 DIRS := ./ $(patsubst %, ./%, $(SUBDIRS))
-OBJDIRS := $(patsubst ./%, $(ROOTDIR)obj/%,$(DIRS) )
+OBJDIRS := $(patsubst %, $(ROOTDIR)obj/%, $(SUBDIRS))
 SOURCE_FILES := $(foreach d, $(DIRS), $(wildcard $(d)*.cu) )
 NEED_MODULES := 
+COMPILE_OPTIONS := -arch=compute_30 -code=sm_30
 
 LIBS = $(NEED_MODULES:%=-l%)
 ARCHIVES = $(foreach lib,$(NEED_MODULES),$(ROOTDIR)lib/lib$(lib).a)
@@ -21,7 +22,7 @@ ARCHIVES = $(foreach lib,$(NEED_MODULES),$(ROOTDIR)lib/lib$(lib).a)
 INCLUDES = -I$(ROOTDIR)include -I/usr/local/cuda/include $(NEED_MODULES:%=-I../%/)
 
 # Create an object file of every cu file
-OBJECTS = $(patsubst ./%, $(ROOTDIR)obj/%, $(patsubst %.cu, %.o, $(SOURCE_FILES)))
+OBJECTS = $(patsubst ./%.cu, $(ROOTDIR)obj/%.o, $(SOURCE_FILES))
 
 # Dependencies
 DEPENDENCIES = $(patsubst ./%.cu, $(ROOTDIR)deps/%.d, $(SOURCE_FILES))
@@ -35,25 +36,17 @@ TARGET := $(ROOTDIR)lib/lib$(PROJECT).a
 	@mkdir -p $@
 
 # Create .d files
-$(ROOTDIR)deps/%.d: %.cu
+$(ROOTDIR)deps/%.d: %.cu $(ROOTDIR)deps/
 	@echo "$(depth) \033[32;1mCC -MM\033[0m $(lastword $(subst /, $(space), $@))"
-	$(NVCC) -E -ccbin=$(CC) --compiler-options=-MM,-MT,$(ROOTDIR)obj/$*.o,-MF,$@ -I./ $(INCLUDES) -L$(ROOTDIR)lib/ $(LIBS) $<
+	@$(NVCC) -E -ccbin=$(CC) --compiler-options=-MM,-MT,$(ROOTDIR)obj/$*.o,-MF,$@ -I./ $(INCLUDES) -L$(ROOTDIR)lib/ $(LIBS) $<
 
 # Make $(PROJECT) the default target
-all: $(OBJDIRS) $(DEPENDENCIES) $(ARCHIVES) $(TARGET)
+all: $(DEPENDENCIES) $(ARCHIVES) $(TARGET)
 
-$(ARCHIVES):
+$(ROOTDIR)lib/lib%.a: $(ROOTDIR)lib/
 	$(eval lib := $(patsubst $(ROOTDIR)lib/lib%.a,%,$@))
-	@echo "$(depth) \033[32;1mMAKE\033[0m ../$(lib) all"
-	@$(MAKE) --quiet --directory=../$(lib) all
-
-$(TARGET): $(OBJECTS)
-	@echo "$(depth) \033[32;1mAR\033[0m $(lastword $(subst /, $(space), $(TARGET)))"
-	@ar cr $(TARGET) $(OBJECTS)
-
-%.exe: %.cu $(TARGET)
-	@echo "$(depth) \033[32;1mCC TEST\033[0m $(lastword $(subst /, $(space), $@))"
-	@$(NVCC) -ccbin=$(CC) $(COMPILE_OPTIONS) -o $@ $< -L$(ROOTDIR)lib/ -l$(PROJECT) -I./ $(INCLUDES) $(LIBS)
+	@echo "$(depth) \033[32;1mMAKE\033[0m $(ROOTDIR)$(lib) all"
+	@$(MAKE) --quiet --directory=$(ROOTDIR)$(lib) all
 
 # Include dependencies (if there are any)
 ifneq "$(strip $(DEPENDENCIES))" ""
@@ -63,7 +56,11 @@ endif
 # Compile every cu file to an object
 $(ROOTDIR)obj/%.o: %.cu
 	@echo "$(depth) \033[32;1mCC\033[0m $(lastword $(subst /, $(space), $@))"
-	@$(NVCC) -ccbin=$(CC) -c $(COMPILE_OPTIONS) -o $@ $< $(HEADERS) -I./ $(INCLUDES) -L$(ROOTDIR)lib/ $(LIBS)
+	@$(NVCC) -ccbin=$(CC) -dc $(COMPILE_OPTIONS) -o $@ $< $(HEADERS) -I./ $(INCLUDES) -L$(ROOTDIR)lib/ $(LIBS)
+
+$(TARGET): $(OBJECTS)
+	@echo "$(depth) \033[32;1mAR\033[0m $(lastword $(subst /, $(space), $(TARGET)))"
+	@ar cr $(TARGET) $(OBJECTS)
 
 # Clean & Debug
 .PHONY: makefile-debug
@@ -72,7 +69,7 @@ makefile-debug:
 .PHONY: clean
 clean:
 	@echo "$(depth) \033[32;1mRM\033[0m $(lastword $(subst /, $(space), $(TARGET)))"
-	@echo "$(depth) \033[32;1mRM\033[0m $(patsubst $(ROOTDIR)obj/%,%,$(OBJECTS))"
+	@echo "$(depth) \033[32;1mRM\033[0m $(patsubst $(ROOTDIR)obj/%, %, $(OBJECTS))"
 	@rm -f $(TARGET) $(OBJECTS) *.plist
 
 .PHONY: depclean
