@@ -5,20 +5,16 @@
 
 namespace dt {
 
-	template<typename T>
-	__global__ void
-	matrix_vector_multiply(vector l, T a, vector r)
-	{
-		a.vector_multiply(l, r);
-	}
-
-	template<typename T>
-	__host__ void
-	launch_mult_kernel(vector& l, T& a, vector& r, dim3 grid, dim3 block)
-	{
-		matrix_vector_multiply<<<grid, block>>>(l, a, r);
-		//CHECK(cudaGetLastError());
-	}
+	class matrix {
+		private:
+			const size_type m_rows, m_cols;
+		public:
+			__device__ matrix(size_type rows, size_type cols) :
+				m_rows(rows), m_cols(cols) {}
+			__device__ virtual data_type operator*(vector&) = 0;
+			__device__ size_type rows() { return m_rows; }
+			__device__ size_type cols() { return m_cols; }
+	};
 
 }
 
