@@ -7,14 +7,14 @@
 
 namespace dt {
 
-	__device__ extern index_type* p_row_indices;
-
-	__device__ extern size_type initialize_mapping(size_type, unsigned char*);
+	__device__ extern index_type compute_index(size_type, unsigned int*);
 
 	class mapping : public matrix {
+		private:
+			bool is_forcing;
+			index_type forcing_index;
 		public:
-			__device__ mapping(size_type, unsigned char*);
-			__device__ ~mapping();  // needed to free p_row_indices
+			__device__ mapping(size_type, size_type, bool, index_type);
 			__device__ data_type operator*(vector&);
 	};
 

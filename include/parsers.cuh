@@ -5,15 +5,15 @@
 
 namespace helpers {
 
-	class uc_parser {
+	class ui_parser {
 		private:
-			unsigned char* nums;
+			unsigned int* nums;
 			size_type length;
 		public:
-			__host__ uc_parser(const char*, size_type);
+			__host__ ui_parser(const char*, size_type);
 			__host__ size_type size() { return length; }
-			__host__ unsigned char* get_ptr() { return nums; }
-			__host__ ~uc_parser() { delete[] nums; }
+			__host__ unsigned int* get_ptr() { return nums; }
+			__host__ ~ui_parser() { delete[] nums; }
 	};
 
 	class coefficient_parser {

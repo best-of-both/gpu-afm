@@ -7,7 +7,7 @@ namespace metrics {
 	norm(point_type& l, point_type& r)
 	{
 		data_type dx = l.x - r.x,
-				  dy = l.y - r.y;
+		          dy = l.y - r.y;
 		return sqrt(dx * dx + dy * dy);
 	}
 

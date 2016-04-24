@@ -4,15 +4,12 @@
 
 namespace dt {
 
-	__device__ data_type* e_entries[NSPECIES];
-	__device__ index_type* e_cols[NSPECIES];
-
 	__device__ void
 	invert_small_matrix(data_type m[9])
 	{
 		data_type a0 = m[0], a1 = m[1], a2 = m[2],
-				  a3 = m[3], a4 = m[4], a5 = m[5],
-				  a6 = m[6], a7 = m[7], a8 = m[8];
+		          a3 = m[3], a4 = m[4], a5 = m[5],
+		          a6 = m[6], a7 = m[7], a8 = m[8];
 		data_type det = a0 * (a4 * a8 - a5 * a7)
 		              + a1 * (a5 * a6 - a3 * a8)
 		              + a2 * (a3 * a7 - a4 * a6);
@@ -32,8 +29,8 @@ namespace dt {
 	multiply_small_matrix(data_type l[9], data_type r[9])
 	{
 		data_type a0 = l[0], a1 = l[1], a2 = l[2],
-				  a3 = l[3], a4 = l[4], a5 = l[5],
-				  a6 = l[6], a7 = l[7], a8 = l[8];
+		          a3 = l[3], a4 = l[4], a5 = l[5],
+		          a6 = l[6], a7 = l[7], a8 = l[8];
 
 		l[0] = a0 * r[0] + a1 * r[3] + a2 * r[6];
 		l[1] = a0 * r[1] + a1 * r[4] + a2 * r[7];
@@ -78,8 +75,8 @@ namespace dt {
 		          dy = pta.y - ptb.y,
 		          r = sqrt(dx * dx + dy * dy);
 		data_type nad = na.x * dx + na.y * dy,
-				  nbd = nb.x * dx + nb.y * dy,
-				  nab = na.x * nb.x + na.y * nb.y;
+		          nbd = nb.x * dx + nb.y * dy,
+		          nab = na.x * nb.x + na.y * nb.y;
 		return aa * ab * phi(r)
 			+ (ab * ba * nad - aa * bb * nbd - ba * bb * nab) * diff(phi(r))
 			- nad * nbd * diff(diff(phi(r)));
@@ -92,9 +89,11 @@ namespace dt {
 			point_type* flu_a, point_type* flu_b, point_type* flu_c,
 			normal_type* eta_a, normal_type* eta_b, normal_type* eta_c,
 			point_type* forcing) :
-		matrix(rows, cols), species(species), phi(eps)
+		matrix(rows, cols), phi(eps)
 	{
 		index_type thread = blockDim.x * blockIdx.x + threadIdx.x;
+		if (thread >= rows)
+			return;
 
 		data_type A[9];
 		data_type L[9];
@@ -105,9 +104,9 @@ namespace dt {
 		point_type &bb = bdy_b[thread];
 		point_type &bc = bdy_c[thread];
 
-		data_type aa = alpha[ba.index];
-		data_type ab = alpha[bb.index];
-		data_type ac = alpha[bc.index];
+		data_type aa = alpha[ba.index-1];
+		data_type ab = alpha[bb.index-1];
+		data_type ac = alpha[bc.index-1];
 
 		point_type &fa = flu_a[thread];
 		point_type &fb = flu_b[thread];
@@ -119,19 +118,19 @@ namespace dt {
 		normal_type& nb = eta_b[thread];
 		normal_type& nc = eta_c[thread];
 
-		/* elements of symmetric A */
+		// elements of symmetric A
 		data_type a0 = phi(0),
-				  a1 = phi(norm(fa, fb)),
-				  a2 = phi(norm(fa, fc)),
-				  a3 = phi(norm(fb, fc));
+		          a1 = phi(norm(fa, fb)),
+		          a2 = phi(norm(fa, fc)),
+		          a3 = phi(norm(fb, fc));
 
-		/* right hand side */
+		// right hand side
 		data_type r0 = phi(norm(f, fa)),
-				  r1 = phi(norm(f, fb)),
-				  r2 = phi(norm(f, fc)),
-				  r3 = boundary_op(f, ba, na, aa, beta),
-				  r4 = boundary_op(f, bb, nb, ab, beta),
-				  r5 = boundary_op(f, bc, nc, ac, beta);
+		          r1 = phi(norm(f, fb)),
+		          r2 = phi(norm(f, fc)),
+		          r3 = boundary_op(f, ba, na, aa, beta),
+		          r4 = boundary_op(f, bb, nb, ab, beta),
+		          r5 = boundary_op(f, bc, nc, ac, beta);
 		data_type t0, t1, t2;              // temporaries
 
 		C[0] = L[0] = boundary_op(ba, fa, na, aa, beta);
@@ -186,6 +185,11 @@ namespace dt {
 		r0 = A[0] * t0 + A[1] * t1 + A[2] * t2;
 		r1 = A[3] * t0 + A[4] * t1 + A[5] * t2;
 		r2 = A[6] * t0 + A[7] * t1 + A[8] * t2;
+
+		indices[0] = ba.index;
+		indices[1] = fa.index; coeffs[0] = r0;
+		indices[2] = fb.index; coeffs[1] = r1;
+		indices[3] = fc.index; coeffs[2] = r2;
 	}
 
 	__device__ data_type

@@ -3,17 +3,17 @@
 
 namespace helpers {
 
-	uc_parser::uc_parser(const char* filename, size_type length) :
+	ui_parser::ui_parser(const char* filename, size_type length) :
 		length(length)
 	{
-		nums = new unsigned char[length];
+		nums = new unsigned int[length];
 		std::ifstream fd;
 		fd.open(filename);
 
 		for (unsigned int i = 0; i < length; ++i) {
 			unsigned int datum;
 			fd >> datum;
-			nums[i] = (unsigned char) datum;
+			nums[i] = (unsigned int) datum;
 		}
 
 		fd.close();

@@ -13,14 +13,12 @@ using metrics::norm;
 
 namespace dt {
 
-	__device__ extern data_type* e_entries[NSPECIES];
-	__device__ extern index_type* e_cols[NSPECIES];
-
 	class hermite : public matrix {
 		private:
 			typedef point_type normal_type;
 
-			const index_type species;
+			data_type coeffs[3];
+			index_type indices[4];
 			const rbfs::mq phi;
 
 			__device__ data_type boundary_op(point_type&, point_type&, normal_type&,
